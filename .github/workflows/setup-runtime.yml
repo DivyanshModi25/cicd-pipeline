@@ -1,0 +1,71 @@
+name: Setup Runtime
+on:
+    workflow_call:
+        inputs:
+            python-version:
+                description: 'Python version to set up'
+                required: false
+                type: string
+                default: '3.12'
+
+            app_directory:
+                description: 'Directory of the application within the repository'
+                required: false
+                type: string
+                default: '.'
+
+jobs:
+    setup-python:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: ${{ inputs.app_directory }}
+
+        steps:
+            - name: Download source artifact
+              uses: actions/download-artifact@v4
+              with:
+                    name: app-source-artifact
+                    path: .
+
+            - name: Verify artifact
+              run: |
+                  echo "Current directory:"
+                  pwd
+                  echo "Listing files:"
+                  ls -R
+
+            - name: Setup Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: ${{ inputs.python-version }}
+
+            - name: Cache pip dependencies
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/pip
+                key: ${{ runner.os }}-pip-${{ hashFiles(format('{0}/requirements.txt',inputs.app_directory)) }}
+                restore-keys: |
+                  ${{ runner.os }}-pip-
+
+
+            - name: Install dependencies
+              run: |
+                  pip install --upgrade pip
+                  if [ -f requirements.txt ]; then
+                   pip install -r requirements.txt
+                  fi
+
+            - name: Verify installation
+              run: |
+                  python --version
+                  pip --version
+                  pip list
+
+            - name: Upload runtime artifact
+              uses: actions/upload-artifact@v4
+              with:
+                    name: prepared-source-artifact
+                    path: .
+                    retention-days: 1

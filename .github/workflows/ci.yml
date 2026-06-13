@@ -1,0 +1,27 @@
+name: CI Pipeline
+
+on:
+    workflow_call:
+        inputs:
+            python-version:
+                description: 'Python version to set up'
+                required: false
+                type: string
+                default: '3.12'
+
+            app_directory:
+                description: 'Directory of the application within the repository'
+                required: false
+                type: string
+                default: '.'
+
+jobs:
+    clone:
+        uses: ./.github/workflows/clone.yml
+
+    setup-runtime:
+        needs: clone
+        uses: ./.github/workflows/setup-runtime.yml
+        with:
+            python-version: ${{ inputs.python-version }}
+            app_directory: ${{ inputs.app_directory }}
