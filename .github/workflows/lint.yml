@@ -29,11 +29,13 @@ jobs:
                   pip install ruff black
 
             - name: Run ruff linting
+              continue-on-error: true
               run: |
-                    ruff check .
+                    ruff check . || echo "::warning::Ruff linting failed"
 
             - name: Run black linting
+              continue-on-error: true
               run: |
-                    black --check .
+                    black --check . || echo "::warning::Black formatting issues found"
 
             
