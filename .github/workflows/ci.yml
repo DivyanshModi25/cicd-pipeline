@@ -25,3 +25,9 @@ jobs:
         with:
             python-version: ${{ inputs.python-version }}
             app_directory: ${{ inputs.app_directory }}
+
+    lint:
+        needs: setup-runtime
+        uses: ./.github/workflows/lint.yml
+        with:
+            app_directory: ${{ inputs.app_directory }}
