@@ -24,18 +24,26 @@ jobs:
                 name: prepared-source-artifact
                 path: .
 
+            - name: Cache lint packages
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/pip
+                key: ${{ runner.os }}-pip-lint-v1
+                restore-keys: |
+                    ${{ runner.os }}-pip-lint-
+
             - name: Install linting tools
               run: |
-                  pip install ruff black
+                pip install ruff black
 
             - name: Run ruff linting
               continue-on-error: true
               run: |
-                    ruff check . || echo "::warning::Ruff linting failed"
+                ruff check . || echo "::warning::Ruff linting failed"
 
             - name: Run black linting
               continue-on-error: true
               run: |
-                    black --check . || echo "::warning::Black formatting issues found"
+                black --check . || echo "::warning::Black formatting issues found"
 
             

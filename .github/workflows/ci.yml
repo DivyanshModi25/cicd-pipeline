@@ -31,3 +31,10 @@ jobs:
         uses: ./.github/workflows/lint.yml
         with:
             app_directory: ${{ inputs.app_directory }}
+
+
+    test:
+        needs: setup-runtime
+        uses: ./.github/workflows/test.yml
+        with:
+            app_directory: ${{ inputs.app_directory }}

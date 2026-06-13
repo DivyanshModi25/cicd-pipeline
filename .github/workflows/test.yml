@@ -1,0 +1,29 @@
+name: Test
+
+on:
+    workflow_call:
+        inputs:
+            app_directory:
+                description: 'Directory of the application within the repository'
+                required: false
+                type: string
+                default: '.'
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: ${{ inputs.app_directory }}
+
+        steps:
+            - name: Download prepared artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: prepared-source-artifact
+                path: .
+
+            - name: Run Tests
+              run: |
+                pytest -v
