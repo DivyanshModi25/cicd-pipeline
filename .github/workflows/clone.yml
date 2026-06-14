@@ -29,6 +29,4 @@ jobs:
                     name: app-source-artifact
                     path: | 
                         .
-                        !.git
-                        !.github
                     retention-days: 1
