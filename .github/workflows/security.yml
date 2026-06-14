@@ -37,12 +37,16 @@ jobs:
                 git status
                 git rev-parse --is-inside-work-tree
 
+            - name: Install Gitleaks
+              run: | 
+                curl -sSfL https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | sh -s -- -b /usr/local/bin
+
+
             - name: Run Gitleaks
               id: gitleaks
-              uses: gitleaks/gitleaks-action@v2
               continue-on-error: true
-              env:
-                GITHUB_TOKEN: ${{ github.token }}
+              run: |
+                gitleaks git --redact
 
             - name: Run Trivy filesystem scan
               id: trivy
@@ -55,7 +59,7 @@ jobs:
                 severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
                 exit-code: '1'
                 ignore-unfixed: false
-                scanners: vuln
+                scanners: vuln,secret,misconfig
 
             - name: Fail if any security scan failed
               run: |
