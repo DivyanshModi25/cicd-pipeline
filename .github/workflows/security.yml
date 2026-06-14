@@ -24,15 +24,30 @@ jobs:
                 name: prepared-source-artifact
 
             - name: Run Gitleaks
+              id: gitleaks
               uses: gitleaks/gitleaks-action@v2
+              continue-on-error: true
               env:
                 GITHUB_TOKEN: ${{ github.token }}
 
             - name: Run Trivy filesystem scan
+              id: trivy
               uses: aquasecurity/trivy-action@v0.24.0
+              continue-on-error: true
               with:
                 scan-type: 'fs'
                 scan-ref: .
                 format: 'table'
                 exit-code: '1'
                 severity: HIGH,CRITICAL
+
+            - name: Fail if any security scan failed
+              run: |
+               echo "Gitleaks results: ${{steps.gitleaks.outcome}}" 
+                echo "Trivy results: ${{steps.trivy.outcome}}"
+                if [[ "${{steps.gitleaks.outcome}}" == "failure" || "${{steps.trivy.outcome}}" == "failure" ]]; then
+                  echo "::error::Security scan failed. Please check the logs for details."
+                  exit 1
+                else
+                  echo "✅ Security scans passed successfully."
+                fi
