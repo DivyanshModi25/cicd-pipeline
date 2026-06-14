@@ -53,17 +53,30 @@ jobs:
                 scan-ref: .
                 format: table
                 severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-                exit-code: '0'
+                exit-code: '1'
                 ignore-unfixed: false
                 scanners: vuln
 
             - name: Fail if any security scan failed
               run: |
-               echo "Gitleaks results: ${{steps.gitleaks.outcome}}" 
-                echo "Trivy results: ${{steps.trivy.outcome}}"
-                if [[ "${{steps.gitleaks.outcome}}" == "failure" || "${{steps.trivy.outcome}}" == "failure" ]]; then
-                  echo "::error::Security scan failed. Please check the logs for details."
-                  exit 1
-                else
-                  echo "✅ Security scans passed successfully."
+                echo "Gitleaks outcome: ${{ steps.gitleaks.outcome }}"
+                echo "Trivy outcome: ${{ steps.trivy.outcome }}"
+
+                FAILED=0
+
+                if [[ "${{ steps.gitleaks.outcome }}" == "failure" ]]; then
+                    echo "::error::Gitleaks detected secrets."
+                    FAILED=1
                 fi
+
+                if [[ "${{ steps.trivy.outcome }}" == "failure" ]]; then
+                    echo "::error::Trivy detected vulnerabilities."
+                    FAILED=1
+                fi
+
+                if [[ $FAILED -eq 1 ]]; then
+                    echo "::error::Security scan failed."
+                    exit 1
+                fi
+
+                echo "✅ All security scans passed."
